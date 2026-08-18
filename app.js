@@ -137,21 +137,23 @@ function renderResult() {
   const stairsDown = forward ? t.stairsDown : t.stairsUp;
 
   els.result.innerHTML = `
-    <div class="result-plank">
-      <div>
-        <div class="time">${t.walkTimeMin} <small>min walk, est.</small></div>
+    <div class="result">
+      <div class="result-path">
+        <span class="route-label">${fromVal} \u2192 ${toVal}</span>
+        <div class="bullets">${bulletHTML(fromLines)}</div>
+        <div class="path-track">
+          <div class="footstep" style="animation-delay:0s"></div>
+          <div class="footstep" style="animation-delay:.5s"></div>
+          <div class="footstep" style="animation-delay:1s"></div>
+        </div>
+        <div class="bullets">${bulletHTML(toLines)}</div>
       </div>
-      <div>
-        <span class="ada-flag ${t.elevator ? "" : "no"}">
-          ${t.elevator ? "\u2713 ADA path available" : "\u2715 no elevator path"}
+      <div class="clock">
+        <div class="time">${t.walkTimeMin}<small>min walk, est.</small></div>
+        <span class="ada-flag ${t.elevator ? "good" : "no"}">
+          ${t.elevator ? "\u2713 ADA path" : "\u2715 no elevator"}
         </span>
       </div>
-    </div>
-    <div class="route-line">
-      <span class="route-label">${fromVal} \u2192 ${toVal}</span>
-      <div class="bullets">${bulletHTML(fromLines)}</div>
-      <span class="arrow">\u2192</span>
-      <div class="bullets">${bulletHTML(toLines)}</div>
     </div>
     <div class="stat-grid">
       <div class="stat">

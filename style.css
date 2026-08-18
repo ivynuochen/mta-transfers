@@ -1,25 +1,23 @@
 /* ==========================================================================
    style.css
-   Design language: NYC subway wayfinding signage.
-   - Black signage planks on tile-white background
-   - Line "bullets" use official-ish MTA line colors, used functionally
-     (to label lines) rather than decoratively
-   - Helvetica-family type, set the way station signage sets it: bold,
-     tight, high-contrast
-   - The transfer result renders as a small wayfinding diagram with
-     directional arrows and stair tallies, styled like an in-station sign
+   Design language: late-night subway platform — dark tunnel surfaces,
+   amber signal-light accent, mono readouts for numbers, condensed display
+   type for headings. Line bullets keep their real MTA colors (data, not
+   decoration); everything else runs on the tunnel/amber palette.
    ========================================================================== */
 
 :root {
-  --tile: #eeece5;
-  --tile-line: #d8d5cb;
-  --ink: #1a1a1a;
-  --ink-soft: #4a4a4a;
-  --plank: #0a0a0a;
-  --plank-text: #ffffff;
-  --accent-line: #1a1a1a;
-  --warn: #b3261e;
-  --ok: #0a6b3d;
+  --tunnel: #0B0E11;
+  --surface: #14181C;
+  --surface-raised: #1B2126;
+  --tile: #E7E2D6;
+  --tile-dim: #B9B3A2;
+  --amber: #FFB000;
+  --amber-dim: #8a5f00;
+  --line: #2A3138;
+  --good: #3FA34D;
+  --warn: #E0483C;
+  --text-dim: #8B9096;
 
   /* MTA line bullet colors */
   --l-1: #ee352e; --l-2: #ee352e; --l-3: #ee352e;
@@ -38,19 +36,14 @@
 
 * { box-sizing: border-box; }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  background: var(--tile);
-  color: var(--ink);
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
+html, body { margin: 0; padding: 0; }
 
 body {
-  background-image:
-    linear-gradient(var(--tile-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--tile-line) 1px, transparent 1px);
-  background-size: 48px 48px;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(255, 176, 0, 0.05), transparent 40%),
+    var(--tunnel);
+  color: var(--tile);
+  font-family: 'IBM Plex Sans', sans-serif;
   min-height: 100vh;
 }
 
@@ -60,257 +53,304 @@ body {
   padding: 32px 20px 80px;
 }
 
-/* ---- Header plank -------------------------------------------------- */
-.plank {
-  background: var(--plank);
-  color: var(--plank-text);
-  padding: 18px 22px;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
+/* ---- Header ------------------------------------------------------- */
+header { margin-bottom: 28px; }
 
-.plank h1 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
+  color: var(--amber);
+  margin: 0 0 10px;
 }
 
-.plank .subtitle {
-  font-size: 0.85rem;
-  color: #c9c9c9;
-  font-weight: 500;
+header h1 {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: clamp(28px, 5vw, 44px);
+  line-height: 1;
+  margin: 0 0 10px;
+  letter-spacing: -0.01em;
+}
+
+.sub {
+  color: var(--text-dim);
+  font-size: 15px;
+  max-width: 60ch;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .disclaimer {
-  margin-top: 10px;
-  padding: 10px 14px;
-  border-left: 4px solid var(--warn);
-  background: #fff8f6;
+  margin-top: 18px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--warn);
+  background: rgba(224, 72, 60, 0.08);
   font-size: 0.82rem;
-  line-height: 1.4;
-  color: var(--ink-soft);
+  line-height: 1.5;
+  color: var(--text-dim);
 }
 
-/* ---- Controls -------------------------------------------------------- */
+.disclaimer strong { color: var(--tile); }
+
+.disclaimer code {
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--tile-dim);
+}
+
+/* ---- Panels / controls --------------------------------------------- */
 .panel {
-  margin-top: 24px;
-  background: #fff;
-  border: 1px solid var(--tile-line);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 22px;
+  margin-top: 20px;
 }
 
-.panel-label {
-  background: var(--plank);
-  color: var(--plank-text);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 6px 14px;
-}
-
-.panel-body {
-  padding: 18px;
-  display: grid;
-  gap: 16px;
-}
-
+.panel-label,
 label {
   display: block;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-soft);
-  margin-bottom: 6px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
 }
+
+.panel-body { display: grid; gap: 16px; }
+.panel-body > div:not(:last-child) { margin-bottom: 0; }
 
 select {
   width: 100%;
-  font-family: inherit;
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 12px 12px;
-  border: 2px solid var(--ink);
-  background: #fff;
-  color: var(--ink);
-  border-radius: 0;
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  color: var(--tile);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 11px 12px;
+  border-radius: 3px;
   appearance: none;
   -webkit-appearance: none;
-  background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%),
-                     linear-gradient(135deg, var(--ink) 50%, transparent 50%);
+  background-image: linear-gradient(45deg, transparent 50%, var(--amber) 50%),
+                     linear-gradient(135deg, var(--amber) 50%, transparent 50%);
   background-position: calc(100% - 20px) center, calc(100% - 15px) center;
   background-size: 5px 5px, 5px 5px;
   background-repeat: no-repeat;
 }
 
-select:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
+select:focus { outline: 2px solid var(--amber); outline-offset: 1px; }
 
-/* ---- Result: wayfinding diagram -------------------------------------- */
+select:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ---- Result: platform-to-platform readout --------------------------- */
 .result {
-  margin-top: 24px;
-}
-
-.result-plank {
-  background: var(--plank);
-  color: var(--plank-text);
-  padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 20px;
+  margin-top: 20px;
+  padding: 26px 24px;
+  background: linear-gradient(180deg, var(--surface-raised), var(--surface));
+  border: 1px solid var(--line);
+  border-radius: 4px;
   flex-wrap: wrap;
-  gap: 10px;
 }
 
-.result-plank .time {
-  font-size: 2rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-
-.result-plank .time small {
-  font-size: 1rem;
-  font-weight: 500;
-  margin-left: 6px;
-  color: #c9c9c9;
-}
-
-.route-line {
+.result-path {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 20px;
-  background: #fff;
-  border: 1px solid var(--tile-line);
-  border-top: none;
-  flex-wrap: wrap;
+  gap: 14px;
+  flex: 1;
+  min-width: 220px;
 }
 
-.bullets {
-  display: flex;
-  gap: 4px;
+.route-label {
+  width: 100%;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  margin-bottom: 4px;
 }
+
+.bullets { display: flex; gap: 4px; flex-shrink: 0; }
 
 .bullet {
-  width: 30px;
-  height: 30px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   color: #fff;
-  font-weight: 800;
-  font-size: 0.85rem;
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.arrow {
-  font-size: 1.4rem;
-  color: var(--ink);
-  margin: 0 4px;
+.path-track {
+  flex: 1;
+  height: 2px;
+  background: var(--line);
+  position: relative;
+  overflow: visible;
+  min-width: 60px;
 }
 
-.route-label {
-  font-size: 0.85rem;
-  color: var(--ink-soft);
+.footstep {
+  position: absolute;
+  top: -4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+  animation: walk 1.8s ease-in-out infinite;
+  opacity: 0;
+}
+
+@keyframes walk {
+  0%   { left: 0%;   opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+.clock {
+  font-family: 'IBM Plex Mono', monospace;
+  text-align: right;
+}
+
+.clock .time {
+  font-size: 44px;
   font-weight: 600;
-  min-width: 100%;
+  color: var(--amber);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
+.clock .time small {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-left: 8px;
+}
+
+.badge {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+.badge.good { background: rgba(63, 163, 77, 0.15); color: var(--good); }
+.badge.no   { background: rgba(224, 72, 60, 0.15); color: var(--warn); }
+
+/* ---- Stat grid (stairs) --------------------------------------------- */
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 1px;
-  background: var(--tile-line);
-  border: 1px solid var(--tile-line);
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 20px;
 }
 
 .stat {
-  background: #fff;
-  padding: 16px;
+  background: var(--surface);
+  padding: 18px 16px;
   text-align: center;
 }
 
 .stat .value {
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 1.6rem;
-  font-weight: 800;
+  font-weight: 600;
+  color: var(--tile);
   font-variant-numeric: tabular-nums;
 }
 
 .stat .label {
-  font-size: 0.7rem;
-  font-weight: 700;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-soft);
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
   margin-top: 4px;
 }
 
 .stat .icon-row {
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 1rem;
-  letter-spacing: 2px;
-  color: var(--ink);
+  letter-spacing: 3px;
+  color: var(--amber);
 }
 
 .note-box {
-  padding: 16px 20px;
-  background: #fff;
-  border: 1px solid var(--tile-line);
-  border-top: none;
-  font-size: 0.9rem;
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 13px;
   line-height: 1.5;
-  color: var(--ink-soft);
+  color: var(--text-dim);
 }
 
-.note-box strong {
-  color: var(--ink);
-}
+.note-box strong { color: var(--tile); }
 
 .ada-flag {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
   padding: 5px 10px;
-  border: 2px solid var(--ok);
-  color: var(--ok);
-  margin-top: 12px;
-}
-
-.ada-flag.no {
-  border-color: var(--warn);
-  color: var(--warn);
+  border-radius: 20px;
+  text-transform: uppercase;
 }
 
 /* ---- Empty state ------------------------------------------------------ */
 .empty-state {
-  margin-top: 24px;
+  margin-top: 20px;
   padding: 40px 20px;
   text-align: center;
-  color: var(--ink-soft);
+  color: var(--text-dim);
   font-size: 0.95rem;
-  border: 2px dashed var(--tile-line);
+  border: 1px dashed var(--line);
+  border-radius: 4px;
 }
 
 /* ---- Footer ------------------------------------------------------------ */
 footer {
-  margin-top: 40px;
-  font-size: 0.75rem;
-  color: var(--ink-soft);
-  text-align: center;
+  margin-top: 36px;
+  font-size: 12px;
+  color: var(--text-dim);
   line-height: 1.6;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+}
+
+footer code {
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--tile-dim);
 }
 
 @media (max-width: 480px) {
-  .plank h1 { font-size: 1.15rem; }
-  .result-plank .time { font-size: 1.5rem; }
+  header h1 { font-size: 1.6rem; }
+  .clock .time { font-size: 1.8rem; }
+  .bullet { width: 34px; height: 34px; font-size: 14px; }
 }

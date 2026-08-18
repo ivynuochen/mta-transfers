@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MTA Transfer Times</title>
+<title>Transfer Time — NYC Subway</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="wrap">
 
-    <div class="plank">
-      <div>
-        <h1>MTA Transfer Times</h1>
-        <div class="subtitle">Walking time &amp; stairs, boarding point to boarding point</div>
-      </div>
-    </div>
+    <header>
+      <p class="eyebrow">// mta subway · transfer walk times</p>
+      <h1>How far is the walk?</h1>
+      <p class="sub">Pick a station, then an origin and destination platform, to see the estimated walking time and stairs for that in-system transfer.</p>
+    </header>
 
     <div class="disclaimer">
       <strong>Estimates, not official MTA data.</strong> The MTA doesn't publish
@@ -52,7 +53,7 @@
       walking time and stairs for that transfer.
     </div>
 
-    <div id="result" class="result" hidden></div>
+    <div id="result" hidden></div>
 
     <footer>
       Covers a curated set of major transfer complexes &mdash; see
