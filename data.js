@@ -158,6 +158,17 @@ const STATIONS = [
         distanceNote: "Across the Fulton Center dome concourse, then down to the A/C level."
       },
       {
+      from: "J/Z platform",
+      fromLines: ["J", "Z"],
+      to: "2/3 platform",
+      toLines: ["2", "3"],
+      walkTimeMin: 3,
+      stairsUp: 1,
+      stairsDown: 1,
+      elevator: true,
+      distanceNote: "Down to the central A/C platform level, walk the corridor, then up to the 2/3 platforms."
+      },
+      {
         from: "A/C platform",
         fromLines: ["A", "C"],
         to: "J/Z platform",
