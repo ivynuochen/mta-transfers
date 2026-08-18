@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MTA Transfer Times</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="plank">
+      <div>
+        <h1>MTA Transfer Times</h1>
+        <div class="subtitle">Walking time &amp; stairs, boarding point to boarding point</div>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      <strong>Estimates, not official MTA data.</strong> The MTA doesn't publish
+      per-path walking times or stair counts, so the figures here are
+      planning-grade approximations meant to give you a realistic sense of a
+      transfer &mdash; verify locally if precision matters (e.g. tight
+      connections, mobility needs). See <code>data.js</code> for sourcing notes
+      and how to correct or extend entries.
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">Choose your transfer</div>
+      <div class="panel-body">
+        <div>
+          <label for="station-select">Station / complex</label>
+          <select id="station-select"></select>
+        </div>
+        <div>
+          <label for="from-select">Boarding from</label>
+          <select id="from-select" disabled>
+            <option selected disabled>Select a station first&hellip;</option>
+          </select>
+        </div>
+        <div>
+          <label for="to-select">Transferring to</label>
+          <select id="to-select" disabled>
+            <option selected disabled>Select a platform first&hellip;</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="empty-state" class="empty-state">
+      Pick a station, then an origin and destination platform, to see the
+      walking time and stairs for that transfer.
+    </div>
+
+    <div id="result" class="result" hidden></div>
+
+    <footer>
+      Covers a curated set of major transfer complexes &mdash; see
+      <code>data.js</code> to add your own station and keep this running
+      locally as a static site (no build step, no server required).
+    </footer>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

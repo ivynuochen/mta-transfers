@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transfer Time — NYC Subway</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --tunnel:#0B0E11;
+    --surface:#14181C;
+    --surface-raised:#1B2126;
+    --tile:#E7E2D6;
+    --tile-dim:#B9B3A2;
+    --amber:#FFB000;
+    --amber-dim:#8a5f00;
+    --line:#2A3138;
+    --good:#3FA34D;
+    --warn:#E0483C;
+    --text-dim:#8B9096;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(255,176,0,0.05), transparent 40%),
+      var(--tunnel);
+    color:var(--tile);
+    font-family:'IBM Plex Sans', sans-serif;
+    min-height:100vh;
+    padding:32px 20px 80px;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+
+  header{margin-bottom:28px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin:0 0 10px;
+  }
+  h1{
+    font-family:'Archivo Black', sans-serif;
+    font-size:clamp(28px,5vw,44px);
+    line-height:1;
+    margin:0 0 10px;
+    letter-spacing:-0.01em;
+  }
+  .sub{color:var(--text-dim);font-size:15px;max-width:60ch;line-height:1.5;margin:0;}
+
+  .panel{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:22px;
+    margin-bottom:20px;
+  }
+
+  label{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    margin-bottom:8px;
+  }
+
+  select, input[type="text"]{
+    width:100%;
+    background:var(--surface-raised);
+    border:1px solid var(--line);
+    color:var(--tile);
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:15px;
+    padding:11px 12px;
+    border-radius:3px;
+    appearance:none;
+  }
+  select:focus, input:focus{outline:2px solid var(--amber); outline-offset:1px;}
+
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  @media(max-width:560px){.row{grid-template-columns:1fr;}}
+
+  .bullet-row{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .bullet{
+    width:30px;height:30px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Archivo Black',sans-serif;
+    font-size:14px;color:#fff;
+    flex-shrink:0;
+    border:2px solid transparent;
+    cursor:pointer;
+    transition:transform .12s ease, border-color .12s ease;
+    background:#666;
+  }
+  .bullet:hover{transform:translateY(-2px);}
+  .bullet.selected{border-color:var(--amber); box-shadow:0 0 0 2px var(--tunnel), 0 0 0 3px var(--amber);}
+  .bullet.other{opacity:.35}
+
+  /* result */
+  .result{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding:26px 24px;
+    background:linear-gradient(180deg, var(--surface-raised), var(--surface));
+    border:1px solid var(--line);
+    border-radius:4px;
+    flex-wrap:wrap;
+  }
+  .result-path{display:flex;align-items:center;gap:14px;flex:1;min-width:220px;}
+  .path-track{
+    flex:1;height:2px;background:var(--line);position:relative;overflow:visible;min-width:60px;
+  }
+  .footstep{
+    position:absolute;top:-4px;width:6px;height:6px;border-radius:50%;
+    background:var(--amber);
+    animation:walk 1.8s ease-in-out infinite;
+    opacity:0;
+  }
+  @keyframes walk{
+    0%{left:0%;opacity:0;}
+    10%{opacity:1;}
+    90%{opacity:1;}
+    100%{left:100%;opacity:0;}
+  }
+  .clock{
+    font-family:'IBM Plex Mono',monospace;
+    text-align:right;
+  }
+  .clock .num{
+    font-size:44px;
+    font-weight:600;
+    color:var(--amber);
+    line-height:1;
+    letter-spacing:-0.02em;
+  }
+  .clock .unit{
+    font-size:12px;
+    color:var(--text-dim);
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+  }
+  .badge{
+    display:inline-block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.08em;
+    padding:3px 8px;
+    border-radius:20px;
+    text-transform:uppercase;
+    margin-top:6px;
+  }
+  .badge.same-platform{background:rgba(63,163,77,0.15); color:var(--good);}
+  .badge.walk{background:rgba(255,176,0,0.15); color:var(--amber);}
+  .badge.long{background:rgba(224,72,60,0.15); color:var(--warn);}
+
+  .note{font-size:13px;color:var(--text-dim);margin-top:14px;line-height:1.5;}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{
+    text-align:left;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    padding:8px 10px;
+    border-bottom:1px solid var(--line);
+  }
+  td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
+  tr:hover td{background:rgba(255,255,255,0.02);}
+  .mini-bullet{
+    width:20px;height:20px;border-radius:50%;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-family:'Archivo Black',sans-serif;font-size:10px;color:#fff;
+    margin-right:4px;
+  }
+  .time-cell{font-family:'IBM Plex Mono',monospace;color:var(--amber);font-weight:600;}
+
+  footer{
+    margin-top:36px;
+    font-size:12px;
+    color:var(--text-dim);
+    line-height:1.6;
+    border-top:1px solid var(--line);
+    padding-top:18px;
+  }
+  footer a{color:var(--tile-dim);}
+
+  .upload-btn{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.05em;
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--tile-dim);
+    padding:8px 12px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .upload-btn:hover{border-color:var(--amber); color:var(--amber);}
+  #fileStatus{font-size:12px; color:var(--text-dim); margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">// mta subway · transfer walk times</p>
+    <h1>How far is the walk?</h1>
+    <p class="sub">Pick a station and two lines to see the estimated walking time for that in-system transfer. Ships with common NYC complexes built in — load the MTA's own GTFS <code>transfers.txt</code> for exact, official figures.</p>
+  </header>
+
+  <div class="panel">
+    <div class="row">
+      <div>
+        <label for="stationSelect">Station / complex</label>
+        <select id="stationSelect"></select>
+      </div>
+      <div>
+        <label for="searchInput">Or search by name</label>
+        <input type="text" id="searchInput" placeholder="e.g. Times Sq, Atlantic Av…">
+      </div>
+    </div>
+
+    <label>From line</label>
+    <div class="bullet-row" id="fromBullets"></div>
+
+    <label style="margin-top:16px;">To line</label>
+    <div class="bullet-row" id="toBullets"></div>
+  </div>
+
+  <div class="panel result" id="resultPanel">
+    <div class="result-path">
+      <div id="fromBulletBig" class="bullet" style="width:44px;height:44px;font-size:18px;"></div>
+      <div class="path-track">
+        <div class="footstep" style="animation-delay:0s"></div>
+        <div class="footstep" style="animation-delay:.5s"></div>
+        <div class="footstep" style="animation-delay:1s"></div>
+      </div>
+      <div id="toBulletBig" class="bullet" style="width:44px;height:44px;font-size:18px;"></div>
+    </div>
+    <div class="clock">
+      <div class="num" id="timeNum">—</div>
+      <div class="unit">estimated walk</div>
+      <div id="badge"></div>
+    </div>
+  </div>
+  <p class="note" id="resultNote"></p>
+
+  <div class="panel">
+    <label style="display:flex;justify-content:space-between;align-items:center;">
+      <span>All transfers at this station</span>
+    </label>
+    <table>
+      <thead><tr><th>From</th><th>To</th><th>Walk time</th><th>Notes</th></tr></thead>
+      <tbody id="transferTableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <label>Import official MTA GTFS data (optional)</label>
+    <p class="note" style="margin-top:0;">
+      Download the subway static feed from
+      <a href="https://www.mta.info/developers" target="_blank" style="color:var(--amber);">mta.info/developers</a>,
+      unzip it, and upload <code>transfers.txt</code> (and optionally <code>stops.txt</code> for station names) here to
+      replace the built-in estimates with the MTA's exact <code>min_transfer_time</code> values.
+    </p>
+    <input type="file" id="transfersFile" accept=".txt,.csv" style="display:none;">
+    <input type="file" id="stopsFile" accept=".txt,.csv" style="display:none;">
+    <button class="upload-btn" onclick="document.getElementById('transfersFile').click()">Upload transfers.txt</button>
+    <button class="upload-btn" onclick="document.getElementById('stopsFile').click()">Upload stops.txt</button>
+    <div id="fileStatus"></div>
+  </div>
+
+  <footer>
+    Built-in figures are rough estimates for common transfer complexes, meant for quick reference — not official MTA
+    data. For exact numbers per platform pair, load the real GTFS <code>transfers.txt</code> feed above; it reports
+    <code>min_transfer_time</code> in seconds for each stop pair, including in-system walks. Source for this app is a
+    single static HTML file — view source or ask for the code to adapt it.
+  </footer>
+
+</div>
+
+<script>
+// ---------- MTA line colors ----------
+const LINE_COLORS = {
+  '1':'#EE352E','2':'#EE352E','3':'#EE352E',
+  '4':'#00933C','5':'#00933C','6':'#00933C','6X':'#00933C',
+  '7':'#B933AD','7X':'#B933AD',
+  'A':'#0039A6','C':'#0039A6','E':'#0039A6',
+  'B':'#FF6319','D':'#FF6319','F':'#FF6319','M':'#FF6319',
+  'G':'#6CBE45',
+  'J':'#996633','Z':'#996633',
+  'L':'#A7A9AC',
+  'N':'#FCCC0A','Q':'#FCCC0A','R':'#FCCC0A','W':'#FCCC0A',
+  'S':'#808183',
+  'SIR':'#0039A6'
+};
+function bulletColor(l){ return LINE_COLORS[l] || '#666'; }
+
+// ---------- Built-in dataset (approximate; not official MTA figures) ----------
+// times in seconds
+const STATIONS = [
+  { name:"Times Sq–42 St / Port Authority", lines:['1','2','3','7','7X','N','Q','R','W','S','A','C','E'],
+    transfers:[
+      {from:'1',to:'2',time:60,note:'Same platform, local/express'},
+      {from:'1',to:'3',time:60,note:'Same platform, local/express'},
+      {from:'2',to:'3',time:30,note:'Same platform'},
+      {from:'N',to:'Q',time:30,note:'Same platform'},
+      {from:'Q',to:'R',time:60,note:'Cross platform'},
+      {from:'1',to:'N',time:240,note:'Via mezzanine, long walk'},
+      {from:'1',to:'7',time:300,note:'Long underground corridor'},
+      {from:'7',to:'A',time:360,note:'Farthest transfer in complex'},
+      {from:'A',to:'C',time:30,note:'Same platform'},
+      {from:'A',to:'E',time:60,note:'Cross platform'},
+      {from:'S',to:'1',time:180,note:'Shuttle to 1/2/3'},
+      {from:'S',to:'N',time:150,note:'Shuttle to N/Q/R/W'},
+    ]},
+  { name:"Fulton St", lines:['2','3','4','5','A','C','J','Z'],
+    transfers:[
+      {from:'4',to:'5',time:30,note:'Same platform'},
+      {from:'2',to:'3',time:30,note:'Same platform'},
+      {from:'2',to:'4',time:150,note:'Via mezzanine'},
+      {from:'A',to:'C',time:30,note:'Same platform'},
+      {from:'A',to:'J',time:240,note:'Via concourse'},
+      {from:'J',to:'Z',time:30,note:'Same platform'},
+      {from:'4',to:'A',time:210,note:'Via main concourse'},
+    ]},
+  { name:"Atlantic Av–Barclays Ctr", lines:['2','3','4','5','B','D','N','Q','R','W'],
+    transfers:[
+      {from:'2',to:'3',time:60,note:'Same platform'},
+      {from:'4',to:'5',time:60,note:'Same platform'},
+      {from:'2',to:'4',time:180,note:'Via mezzanine'},
+      {from:'B',to:'Q',time:180,note:'Via connecting passage'},
+      {from:'N',to:'R',time:240,note:'Long walk, separate mezzanines'},
+      {from:'2',to:'B',time:300,note:'Longest walk in complex'},
+    ]},
+  { name:"34 St–Herald Sq", lines:['B','D','F','M','N','Q','R','W'],
+    transfers:[
+      {from:'B',to:'D',time:30,note:'Same platform'},
+      {from:'F',to:'M',time:30,note:'Same platform'},
+      {from:'N',to:'Q',time:60,note:'Same platform'},
+      {from:'R',to:'W',time:60,note:'Same platform'},
+      {from:'B',to:'N',time:150,note:'Cross-platform via stairs'},
+      {from:'F',to:'N',time:180,note:'Via mezzanine'},
+    ]},
+  { name:"Union Square–14 St", lines:['4','5','6','6X','L','N','Q','R','W'],
+    transfers:[
+      {from:'4',to:'5',time:30,note:'Same platform'},
+      {from:'5',to:'6',time:60,note:'Cross platform'},
+      {from:'N',to:'Q',time:30,note:'Same platform'},
+      {from:'Q',to:'R',time:60,note:'Same platform'},
+      {from:'L',to:'4',time:210,note:'Via long connecting corridor'},
+      {from:'L',to:'N',time:240,note:'Via connecting corridor'},
+      {from:'6',to:'L',time:180,note:'Down escalators to L'},
+    ]},
+  { name:"Grand Central–42 St", lines:['4','5','6','6X','7','7X','S'],
+    transfers:[
+      {from:'4',to:'5',time:30,note:'Same platform'},
+      {from:'5',to:'6',time:60,note:'Cross platform'},
+      {from:'6',to:'7',time:240,note:'Via shuttle passage'},
+      {from:'S',to:'4',time:150,note:'Shuttle to 4/5/6'},
+      {from:'S',to:'7',time:210,note:'Shuttle to 7'},
+    ]},
+  { name:"Jay St–MetroTech", lines:['A','C','F','R'],
+    transfers:[
+      {from:'A',to:'C',time:30,note:'Same platform'},
+      {from:'F',to:'R',time:180,note:'Via mezzanine'},
+      {from:'A',to:'F',time:210,note:'Via mezzanine and stairs'},
+    ]},
+  { name:"59 St–Columbus Circle", lines:['1','A','B','C','D'],
+    transfers:[
+      {from:'A',to:'C',time:30,note:'Same platform'},
+      {from:'B',to:'D',time:30,note:'Same platform'},
+      {from:'1',to:'A',time:180,note:'Via long connecting corridor'},
+      {from:'1',to:'B',time:210,note:'Via connecting corridor'},
+    ]},
+  { name:"125 St (Lexington Av)", lines:['4','5','6','6X'],
+    transfers:[
+      {from:'4',to:'5',time:30,note:'Same platform'},
+      {from:'5',to:'6',time:120,note:'Via stairs between levels'},
+    ]},
+  { name:"Court Sq", lines:['7','7X','E','M','G'],
+    transfers:[
+      {from:'7',to:'E',time:150,note:'Via mezzanine'},
+      {from:'E',to:'M',time:30,note:'Same platform'},
+      {from:'7',to:'G',time:210,note:'Longer walk, separate levels'},
+    ]},
+  { name:"Broadway Junction", lines:['A','C','J','Z','L'],
+    transfers:[
+      {from:'A',to:'C',time:30,note:'Same platform'},
+      {from:'J',to:'Z',time:30,note:'Same platform'},
+      {from:'A',to:'L',time:210,note:'Via elevated walkways'},
+      {from:'J',to:'A',time:180,note:'Via connecting bridge'},
+    ]},
+  { name:"Chambers St / WTC / Park Pl", lines:['2','3','A','C','1','E','R','W'],
+    transfers:[
+      {from:'2',to:'3',time:30,note:'Same platform'},
+      {from:'A',to:'C',time:30,note:'Same platform'},
+      {from:'2',to:'A',time:180,note:'Via underpass'},
+      {from:'1',to:'E',time:240,note:'Via long WTC concourse'},
+      {from:'R',to:'2',time:300,note:'Longest walk, via Fulton complex'},
+    ]},
+];
+
+let dataStations = STATIONS;
+let usingCustomData = false;
+
+// ---------- UI wiring ----------
+const stationSelect = document.getElementById('stationSelect');
+const searchInput = document.getElementById('searchInput');
+const fromBullets = document.getElementById('fromBullets');
+const toBullets = document.getElementById('toBullets');
+const timeNum = document.getElementById('timeNum');
+const badge = document.getElementById('badge');
+const resultNote = document.getElementById('resultNote');
+const fromBulletBig = document.getElementById('fromBulletBig');
+const toBulletBig = document.getElementById('toBulletBig');
+const tableBody = document.getElementById('transferTableBody');
+
+let currentStation = null;
+let fromLine = null;
+let toLine = null;
+
+function populateStationSelect(filter=''){
+  const f = filter.trim().toLowerCase();
+  stationSelect.innerHTML = '';
+  dataStations
+    .filter(s=>s.name.toLowerCase().includes(f))
+    .forEach((s,i)=>{
+      const opt = document.createElement('option');
+      opt.value = s.name;
+      opt.textContent = s.name;
+      stationSelect.appendChild(opt);
+    });
+  if(stationSelect.options.length){
+    stationSelect.selectedIndex = 0;
+    selectStation(stationSelect.value);
+  } else {
+    currentStation = null;
+    renderAll();
+  }
+}
+
+function selectStation(name){
+  currentStation = dataStations.find(s=>s.name===name);
+  fromLine = currentStation ? currentStation.lines[0] : null;
+  toLine = currentStation && currentStation.lines[1] ? currentStation.lines[1] : fromLine;
+  renderAll();
+}
+
+function makeBullet(line, container, selectedLine, onClick){
+  const b = document.createElement('div');
+  b.className = 'bullet' + (line===selectedLine ? ' selected':'');
+  b.style.background = bulletColor(line);
+  b.textContent = line;
+  b.title = 'Line ' + line;
+  b.onclick = ()=>onClick(line);
+  container.appendChild(b);
+}
+
+function renderBullets(){
+  fromBullets.innerHTML=''; toBullets.innerHTML='';
+  if(!currentStation) return;
+  currentStation.lines.forEach(l=>{
+    makeBullet(l, fromBullets, fromLine, (line)=>{ fromLine=line; renderAll(); });
+    makeBullet(l, toBullets, toLine, (line)=>{ toLine=line; renderAll(); });
+  });
+}
+
+function fmtTime(sec){
+  if(sec==null) return {num:'—',unit:'no data'};
+  if(sec < 60) return {num:sec, unit:'seconds'};
+  const min = Math.round(sec/60);
+  return {num:min, unit: min===1 ? 'minute':'minutes'};
+}
+
+function findTransfer(station, a, b){
+  if(!station || !a || !b) return null;
+  if(a===b) return {time:0, note:'Same line — no transfer needed', same:true};
+  return station.transfers.find(t=>
+    (t.from===a && t.to===b) || (t.from===b && t.to===a)
+  ) || null;
+}
+
+function renderResult(){
+  const t = findTransfer(currentStation, fromLine, toLine);
+  fromBulletBig.style.background = fromLine ? bulletColor(fromLine) : '#333';
+  fromBulletBig.textContent = fromLine || '';
+  toBulletBig.style.background = toLine ? bulletColor(toLine) : '#333';
+  toBulletBig.textContent = toLine || '';
+
+  badge.innerHTML='';
+  if(!currentStation || !fromLine || !toLine){
+    timeNum.textContent = '—';
+    resultNote.textContent = 'Choose a station and two lines above.';
+    return;
+  }
+  if(fromLine===toLine){
+    timeNum.textContent = '0';
+    resultNote.textContent = 'Same line selected on both sides.';
+    badge.innerHTML = '<span class="badge same-platform">no transfer</span>';
+    return;
+  }
+  if(!t){
+    timeNum.textContent = '?';
+    resultNote.textContent = `No recorded transfer between ${fromLine} and ${toLine} at ${currentStation.name}${usingCustomData ? '' : ' in the built-in dataset — try loading official GTFS data.'}`;
+    badge.innerHTML = '<span class="badge long">unknown</span>';
+    return;
+  }
+  const f = fmtTime(t.time);
+  timeNum.textContent = f.num;
+  document.querySelector('.clock .unit').textContent = f.unit === 'no data' ? 'no data' : f.unit + (f.unit!=='no data' ? ' walk':'');
+  resultNote.textContent = t.note || '';
+  let cls = 'walk';
+  if(t.time<=45) cls='same-platform';
+  else if(t.time>=200) cls='long';
+  const label = t.time<=45 ? 'quick' : (t.time>=200 ? 'long walk' : 'walk');
+  badge.innerHTML = `<span class="badge ${cls}">${label}</span>`;
+}
+
+function renderTable(){
+  tableBody.innerHTML='';
+  if(!currentStation || !currentStation.transfers.length){
+    tableBody.innerHTML = '<tr><td colspan="4" style="color:var(--text-dim);">No transfer data for this station.</td></tr>';
+    return;
+  }
+  currentStation.transfers.forEach(t=>{
+    const tr = document.createElement('tr');
+    const f = fmtTime(t.time);
+    tr.innerHTML = `
+      <td><span class="mini-bullet" style="background:${bulletColor(t.from)}">${t.from}</span></td>
+      <td><span class="mini-bullet" style="background:${bulletColor(t.to)}">${t.to}</span></td>
+      <td class="time-cell">${f.num} ${f.unit}</td>
+      <td style="color:var(--text-dim);">${t.note||''}</td>
+    `;
+    tr.style.cursor='pointer';
+    tr.onclick = ()=>{ fromLine=t.from; toLine=t.to; renderAll(); };
+    tableBody.appendChild(tr);
+  });
+}
+
+function renderAll(){
+  renderBullets();
+  renderResult();
+  renderTable();
+}
+
+stationSelect.addEventListener('change', e=>selectStation(e.target.value));
+searchInput.addEventListener('input', e=>populateStationSelect(e.target.value));
+
+// ---------- CSV import for real GTFS data ----------
+let stopNames = {}; // stop_id -> name
+let stopToLines = {}; // best-effort: not derivable without routes/stop_times, so we keep raw stop_id as "line" label if needed
+
+function parseCSV(text){
+  const lines = text.split(/\r?\n/).filter(l=>l.length);
+  const headers = lines[0].split(',').map(h=>h.trim());
+  return lines.slice(1).map(line=>{
+    // naive CSV split (GTFS fields rarely contain commas in quotes for these files, but handle quotes just in case)
+    const vals = line.match(/(".*?"|[^,]+|(?<=,)(?=,)|^(?=,))/g) || [];
+    const row = {};
+    headers.forEach((h,i)=>{ row[h] = (vals[i]||'').replace(/^"|"$/g,'').trim(); });
+    return row;
+  });
+}
+
+document.getElementById('stopsFile').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const rows = parseCSV(reader.result);
+    stopNames = {};
+    rows.forEach(r=>{ if(r.stop_id) stopNames[r.stop_id] = r.stop_name; });
+    document.getElementById('fileStatus').textContent = `Loaded ${rows.length} stops.`;
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('transfersFile').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const rows = parseCSV(reader.result);
+    // Group by from_stop_id's parent station id (GTFS subway stop_ids: parent has no suffix, platforms have N/S suffix)
+    const byStation = {};
+    rows.forEach(r=>{
+      if(!r.from_stop_id || !r.to_stop_id) return;
+      if(r.from_stop_id === r.to_stop_id) return;
+      const stationKey = r.from_stop_id.replace(/[NS]$/,'');
+      const label = stopNames[r.from_stop_id] || stopNames[stationKey] || stationKey;
+      if(!byStation[stationKey]) byStation[stationKey] = { name: label, lines:new Set(), transfers:[] };
+      const fromLabel = stopNames[r.from_stop_id] || r.from_stop_id;
+      const toLabel = stopNames[r.to_stop_id] || r.to_stop_id;
+      byStation[stationKey].lines.add(r.from_stop_id);
+      byStation[stationKey].lines.add(r.to_stop_id);
+      byStation[stationKey].transfers.push({
+        from: r.from_stop_id,
+        to: r.to_stop_id,
+        time: r.min_transfer_time ? parseInt(r.min_transfer_time,10) : null,
+        note: `Stop ${r.from_stop_id} → ${r.to_stop_id}`
+      });
+    });
+    const stations = Object.values(byStation).map(s=>({
+      name: s.name,
+      lines: Array.from(s.lines),
+      transfers: s.transfers
+    })).filter(s=>s.transfers.length);
+
+    if(stations.length){
+      dataStations = stations;
+      usingCustomData = true;
+      document.getElementById('fileStatus').textContent =
+        `Loaded ${rows.length} transfer records across ${stations.length} stations from your file. Using official data now.`;
+      populateStationSelect();
+    } else {
+      document.getElementById('fileStatus').textContent = 'Could not find usable transfer rows in that file.';
+    }
+  };
+  reader.readAsText(file);
+});
+
+// init
+populateStationSelect();
+</script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+/* ==========================================================================
+   style.css
+   Design language: NYC subway wayfinding signage.
+   - Black signage planks on tile-white background
+   - Line "bullets" use official-ish MTA line colors, used functionally
+     (to label lines) rather than decoratively
+   - Helvetica-family type, set the way station signage sets it: bold,
+     tight, high-contrast
+   - The transfer result renders as a small wayfinding diagram with
+     directional arrows and stair tallies, styled like an in-station sign
+   ========================================================================== */
+
+:root {
+  --tile: #eeece5;
+  --tile-line: #d8d5cb;
+  --ink: #1a1a1a;
+  --ink-soft: #4a4a4a;
+  --plank: #0a0a0a;
+  --plank-text: #ffffff;
+  --accent-line: #1a1a1a;
+  --warn: #b3261e;
+  --ok: #0a6b3d;
+
+  /* MTA line bullet colors */
+  --l-1: #ee352e; --l-2: #ee352e; --l-3: #ee352e;
+  --l-4: #00933c; --l-5: #00933c; --l-6: #00933c;
+  --l-7: #b933ad;
+  --l-a: #0039a6; --l-c: #0039a6; --l-e: #0039a6;
+  --l-b: #ff6319; --l-d: #ff6319; --l-f: #ff6319; --l-m: #ff6319;
+  --l-g: #6cbe45;
+  --l-j: #996633; --l-z: #996633;
+  --l-l: #a7a9ac;
+  --l-n: #fccc0a; --l-q: #fccc0a; --l-r: #fccc0a; --l-w: #fccc0a;
+  --l-s: #808183;
+
+  font-size: 16px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--tile);
+  color: var(--ink);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+body {
+  background-image:
+    linear-gradient(var(--tile-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--tile-line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  min-height: 100vh;
+}
+
+.wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+
+/* ---- Header plank -------------------------------------------------- */
+.plank {
+  background: var(--plank);
+  color: var(--plank-text);
+  padding: 18px 22px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.plank h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.plank .subtitle {
+  font-size: 0.85rem;
+  color: #c9c9c9;
+  font-weight: 500;
+}
+
+.disclaimer {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-left: 4px solid var(--warn);
+  background: #fff8f6;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/* ---- Controls -------------------------------------------------------- */
+.panel {
+  margin-top: 24px;
+  background: #fff;
+  border: 1px solid var(--tile-line);
+}
+
+.panel-label {
+  background: var(--plank);
+  color: var(--plank-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+}
+
+.panel-body {
+  padding: 18px;
+  display: grid;
+  gap: 16px;
+}
+
+label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+select {
+  width: 100%;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 12px;
+  border: 2px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%),
+                     linear-gradient(135deg, var(--ink) 50%, transparent 50%);
+  background-position: calc(100% - 20px) center, calc(100% - 15px) center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+select:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- Result: wayfinding diagram -------------------------------------- */
+.result {
+  margin-top: 24px;
+}
+
+.result-plank {
+  background: var(--plank);
+  color: var(--plank-text);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.result-plank .time {
+  font-size: 2rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.result-plank .time small {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-left: 6px;
+  color: #c9c9c9;
+}
+
+.route-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid var(--tile-line);
+  border-top: none;
+  flex-wrap: wrap;
+}
+
+.bullets {
+  display: flex;
+  gap: 4px;
+}
+
+.bullet {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.arrow {
+  font-size: 1.4rem;
+  color: var(--ink);
+  margin: 0 4px;
+}
+
+.route-label {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-weight: 600;
+  min-width: 100%;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1px;
+  background: var(--tile-line);
+  border: 1px solid var(--tile-line);
+}
+
+.stat {
+  background: #fff;
+  padding: 16px;
+  text-align: center;
+}
+
+.stat .value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat .label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+.stat .icon-row {
+  margin-top: 6px;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  color: var(--ink);
+}
+
+.note-box {
+  padding: 16px 20px;
+  background: #fff;
+  border: 1px solid var(--tile-line);
+  border-top: none;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.note-box strong {
+  color: var(--ink);
+}
+
+.ada-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px 10px;
+  border: 2px solid var(--ok);
+  color: var(--ok);
+  margin-top: 12px;
+}
+
+.ada-flag.no {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+/* ---- Empty state ------------------------------------------------------ */
+.empty-state {
+  margin-top: 24px;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  border: 2px dashed var(--tile-line);
+}
+
+/* ---- Footer ------------------------------------------------------------ */
+footer {
+  margin-top: 40px;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  text-align: center;
+  line-height: 1.6;
+}
+
+@media (max-width: 480px) {
+  .plank h1 { font-size: 1.15rem; }
+  .result-plank .time { font-size: 1.5rem; }
+}
